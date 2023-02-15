@@ -2,6 +2,9 @@ from time import sleep
 import cv2 as cv
 import numpy as np
 
+WIDTH = 400
+HEIGHT = 300
+
 
 def setup_camera():
     cam = cv.VideoCapture(0)
