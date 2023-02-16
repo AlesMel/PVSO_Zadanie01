@@ -2,6 +2,9 @@ from time import sleep
 import cv2 as cv
 import numpy as np
 
+WIDTH = 400
+HEIGHT = 300
+
 
 def setup_camera():
     cam = cv.VideoCapture(0)
@@ -22,11 +25,20 @@ cam = setup_camera()
 cur_index = 0
 image_data = []
 
+# Edge detection kernel
+kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
+
 while cur_index < 4:
     processed_image = process_image(400, 300)
     pressed = cv.waitKey(1)
     if pressed == ord(' '):
+
+        if cur_index == 0:
+            # If it's first image apply kernel
+            processed_image = cv.filter2D(processed_image, -1, kernel)
+
         image_data.append(processed_image)
+        # Apply kernel
         cv.imwrite("pekne_fotky_{0}.jpg".format(cur_index), processed_image)
         cur_index += 1
     elif pressed == ord('q'):
