@@ -75,7 +75,7 @@ post_process_image(mosaic, kernel)
 # Print information about image
 print("Dimensions(H x W): ", mosaic.shape[0], " x ", mosaic.shape[1])
 print("Type: ", mosaic.dtype)
-print("Size: ", mosaic.size / 1024, "kB")
+print("Size: ", mosaic.size)
 
 # cv.imshow("image", mosaic)
 # cv.waitKey()
