@@ -22,8 +22,8 @@ def post_process_image(image: np.ndarray, kernel: np.ndarray,
         image[:int(height / 2), :int(width / 2)] = processed_part
 
         # Color channel
-        image[int(height / 2):, int(width / 2):, 0] = 0  # Blue
-        image[int(height / 2):, int(width / 2):, 1] = 0  # Green
+        image[int(height / 2):, :int(width / 2), 0] = 0  # Blue
+        image[int(height / 2):, :int(width / 2), 1] = 0  # Green
         # image[int(height / 2):, int(width / 2):, 2] = 0  # Red
 
         cv.imshow("image", image)
