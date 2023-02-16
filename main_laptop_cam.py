@@ -17,9 +17,14 @@ def post_process_image(image: np.ndarray, kernel: np.ndarray,
         height = image.shape[0]
         width = image.shape[1]
 
-        # Calculate corresponding dimensions
+        # Kernel
         processed_part = cv.filter2D(np.array(image[:int(height / 2), :int(width / 2)]), -1, kernel)
         image[:int(height / 2), :int(width / 2)] = processed_part
+
+        # Color channel
+        image[int(height / 2):, int(width / 2):, 0] = 0  # Blue
+        image[int(height / 2):, int(width / 2):, 1] = 0  # Green
+        # image[int(height / 2):, int(width / 2):, 2] = 0  # Red
 
         cv.imshow("image", image)
         cv.waitKey()
@@ -63,12 +68,12 @@ cv.imwrite("mosaic.jpg", np.array(result))
 mosaic = cv.imread("mosaic.jpg")
 
 kernel = np.array([[-1, -1, -1],
-                   [-1,  8, -1],
+                   [-1, 8, -1],
                    [-1, -1, -1]])
 post_process_image(mosaic, kernel)
 
-cv.imshow("image", mosaic)
-cv.waitKey()
+# cv.imshow("image", mosaic)
+# cv.waitKey()
 
 # After the loop release the cap object
 cam.release()
