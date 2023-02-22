@@ -1,35 +1,13 @@
-from time import sleep
 import cv2 as cv
 import numpy as np
+import image_processing as ip
 
 WIDTH: int = 400
 HEIGHT: int = 400
 
-
 def setup_camera():
     cam = cv.VideoCapture(0)
     return cam
-
-
-def post_process_image(image: np.ndarray, kernel: np.ndarray,
-                       img_index_x: int = 1, img_index_y: int = 1):
-    if isinstance(image, np.ndarray):
-        height = image.shape[0]
-        width = image.shape[1]
-
-        # Kernel
-        processed_part = cv.filter2D(np.array(image[:int(height / 2), :int(width / 2)]), -1, kernel)
-        image[:int(height / 2), :int(width / 2)] = processed_part
-
-        # Color channel
-        image[int(height / 2):, :int(width / 2), 0] = 0  # Blue
-        image[int(height / 2):, :int(width / 2), 1] = 0  # Green
-        # image[int(height / 2):, int(width / 2):, 2] = 0  # Red
-
-        cv.imshow("image", image)
-        cv.waitKey()
-        return True
-    return False
 
 
 def process_image(width, height):
@@ -37,40 +15,49 @@ def process_image(width, height):
     image = cv.resize(img, (width, height))
     return image
 
-
-def concat_images(images):
-    return cv.vconcat([cv.hconcat(img) for img in images])
-
-
 cam = setup_camera()
+
+
 cur_index = 0
 image_data = []
 
+image_channels = 3
+cols = 2
+rows = 2
+
 while cur_index < 4:
-    processed_image = process_image(WIDTH, HEIGHT)
+    processed_image = ip.process_image(cam, WIDTH, HEIGHT)
     pressed = cv.waitKey(1)
     if pressed == ord(' '):
         image_data.append(processed_image)
-        # Apply kernel
-        cv.imwrite("pekne_fotky_{0}.jpg".format(cur_index), processed_image)
+        cv.imwrite("Images/pekne_fotky_{0}.jpg".format(cur_index), processed_image)
         cur_index += 1
     elif pressed == ord('q'):
-        break
-    cv.imshow("Image", processed_image)
+        exit(0)
+    cv.imshow("Images/Image", processed_image)
 
 # now concat the data but reshape them first to be 2x2 grid
-result = concat_images(np.array(image_data).reshape(2, 2, HEIGHT, WIDTH, 3))
+result = ip.concat_images(np.array(image_data).reshape(cols, rows, HEIGHT, WIDTH, image_channels))
 
 # save the image as mosaic.jpg
-cv.imwrite("mosaic.jpg", np.array(result))
+cv.imwrite("Images/mosaic.jpg", np.array(result))
+
+# kernel
+kernel = np.array([[-1, -1, -1],
+                   [-1, 8, -1],
+                   [-1, -1, -1]])
+
+adj = ip.apply_kernel(cv.imread("Images/mosaic.jpg"), 1, kernel, WIDTH, HEIGHT)
+adj = ip.apply_color(adj, 2, "red", WIDTH, HEIGHT)
+adj = ip.rotate_images(adj, 90, 3, WIDTH, HEIGHT)
+cv.imwrite("Images/mosaic_with_kernel.jpg", adj)
 
 # Post process mosaic
-mosaic = cv.imread("mosaic.jpg")
+mosaic = cv.imread("Images/mosaic.jpg")
 
 kernel = np.array([[-1, -1, -1],
                    [-1, 8, -1],
                    [-1, -1, -1]])
-post_process_image(mosaic, kernel)
 
 # Print information about image
 print("Dimensions(H x W): ", mosaic.shape[0], " x ", mosaic.shape[1])
