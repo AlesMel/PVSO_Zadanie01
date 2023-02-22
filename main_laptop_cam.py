@@ -49,7 +49,7 @@ kernel = np.array([[-1, -1, -1],
 
 adj = ip.apply_kernel(cv.imread("Images/mosaic.jpg"), 1, kernel, WIDTH, HEIGHT)
 adj = ip.apply_color(adj, 2, "red", WIDTH, HEIGHT)
-adj = ip.rotate_images(adj, 90, 3, WIDTH, HEIGHT)
+adj = ip.rotate_image(adj, 3, WIDTH, HEIGHT)
 cv.imwrite("Images/mosaic_with_kernel.jpg", adj)
 
 # Post process mosaic

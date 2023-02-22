@@ -43,14 +43,6 @@ def apply_color(images, image_number, color, width, height):
     img = images[row_index * height:(row_index + 1) * height, col_index * width:(col_index + 1) * width]
     chosen_color = color_switcher.get(color, -1)
 
-    # hsv_img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-    #
-    # lower_red = np.array([0, 50, 50])
-    # upper_red = np.array([10, 255, 255])
-
-    # mask = cv.inRange(hsv_img, lower_red, upper_red)
-    # img = cv.bitwise_and(img, img, mask=mask)
-
     for i in range(3):
         if i != chosen_color:
             img[:, :, i] = 0
@@ -60,30 +52,27 @@ def apply_color(images, image_number, color, width, height):
     return images
 
 
-def divide_images(images, ratio):
-    mozaic_height, mozaic_width, depth = images.shape
-
-    # individiual img size
-    img_height = mozaic_height // ratio[1]
-    img_width = mozaic_width // ratio[0]
-
-    # divide images along height
-    divided_images = np.split(images, ratio[0], axis=0)
-
-    # divide images along width
-    for i in range(len(divided_images)):
-        divided_images[i] = np.split(divided_images[i], ratio[1], axis=1)
-
-    return divided_images
-
-
-def rotate_images(images, angle, image_number, height, width):
+def extract_image(images, image_number, height, width):
     row_index = (image_number - 1) // 2
     col_index = (image_number - 1) % 2
     extracted_image = images[row_index * height:(row_index + 1) * height, col_index * width:(col_index + 1) * width]
-    img_size = (height, width)
-    center = (img_size[0] // 2, img_size[1] // 2)
-    rot_matrix = cv.getRotationMatrix2D(center, angle, 1.0)
-    rotated_tile = cv.warpAffine(extracted_image, rot_matrix, img_size)
-    images[row_index * height:(row_index + 1) * height, col_index * width:(col_index + 1) * width] = rotated_tile
+    return extracted_image
+
+
+def rotate_image(images, image_number, height, width):
+    row_index = (image_number - 1) // 2
+    col_index = (image_number - 1) % 2
+
+    extracted_image = images[row_index * height:(row_index + 1) * height, col_index * width:(col_index + 1) * width]
+
+    # Create a new 2D list with the dimensions swapped
+    rotated_tile = np.empty((height, width, 3))
+
+    # Loop through the original image and copy each pixel to the new image
+    for i in range(width):
+        for j in range(height):
+            # rotated_tile[j][i] = extracted_image[i][height-j-1]
+            rotated_tile[i][j] = extracted_image[j][height-i-1]
+
+    images[row_index * height:(row_index + 1) * height, col_index * width:(col_index + 1) * width] = np.array(rotated_tile)
     return images
